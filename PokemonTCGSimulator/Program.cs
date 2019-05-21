@@ -22,9 +22,7 @@ namespace PokemonTCGSimulator
             equipment = new List<Card>();
 
             if (!File.Exists("save.tcgs"))
-            {
                 File.Create("save.tcgs").Close();
-            }
 
             opened = true;
 
@@ -86,6 +84,8 @@ namespace PokemonTCGSimulator
             catch
             {
                 kc.wl("Brak boosterów");
+                kc.rk();
+                return;
             }
 
             string name = kc.rl();
@@ -97,9 +97,7 @@ namespace PokemonTCGSimulator
                 CImage.ConsoleWriteImage(new System.Drawing.Bitmap(APP_PATH + @"Boosters\" + pack.name + @"\cover.png"));
             }
             catch
-            {
-                CImage.ConsoleWriteImage(new System.Drawing.Bitmap(APP_PATH + @"Boosters\SM3\cover.png"));
-            }
+            {}
 
             kc.wl("--------------------------------");
             kc.wl("");
@@ -235,46 +233,52 @@ namespace PokemonTCGSimulator
 
         public static void GenerateCards() {
 
-            //dla każdego boostera
-            foreach (var dir in Directory.GetDirectories(APP_PATH + @"Boosters\"))
+            try
             {
-                //bierzemy informacje o nim
-                DirectoryInfo d = new DirectoryInfo(dir);
-                //jeżeli nie ma w nim plików (domyślnie json'ów odpowiadających za karty)
-                if (!File.Exists(d.FullName + @"\pokemons.json"))
+                //dla każdego boostera
+                foreach (var dir in Directory.GetDirectories(APP_PATH + @"Boosters\"))
                 {
-                    wl("Generowanie bazy kart... ");
-                    //generuj json
-
-                    string pth = d.FullName + @"\pokemons.json";
-
-                    //tworzymy plik bazy
-                    File.Create(pth).Close();
-
-                    foreach(var d2 in d.GetDirectories())
+                    //bierzemy informacje o nim
+                    DirectoryInfo d = new DirectoryInfo(dir);
+                    //jeżeli nie ma w nim plików (domyślnie json'ów odpowiadających za karty)
+                    if (!File.Exists(d.FullName + @"\pokemons.json"))
                     {
-                        //wypisujemy jakie pokemony ładuje gra
-                        kc.wl("Pokemony " + d2.Name);
+                        kc.wl("Generowanie bazy kart... ");
+                        //generuj json
 
-                        foreach(var file in d2.GetFiles())
+                        string pth = d.FullName + @"\pokemons.json";
+
+                        //tworzymy plik bazy
+                        File.Create(pth).Close();
+
+                        foreach (var d2 in d.GetDirectories())
                         {
-                            //serializacja do json
-                            Card c = new Card(
-                                Convert.ToInt32(Path.GetFileNameWithoutExtension(file.Name)), 
-                                Path.GetFileName(Path.GetDirectoryName(file.FullName)), 
-                                file.Name, 
-                                d.Name);
-                            string json = JsonConvert.SerializeObject(c);
-                            File.AppendAllText(pth, json + Environment.NewLine);
-                        }
+                            //wypisujemy jakie pokemony ładuje gra
+                            kc.wl("Pokemony " + d2.Name);
 
+                            foreach (var file in d2.GetFiles())
+                            {
+                                //serializacja do json
+                                Card c = new Card(
+                                    Convert.ToInt32(Path.GetFileNameWithoutExtension(file.Name)),
+                                    Path.GetFileName(Path.GetDirectoryName(file.FullName)),
+                                    file.Name,
+                                    d.Name);
+                                string json = JsonConvert.SerializeObject(c);
+                                File.AppendAllText(pth, json + Environment.NewLine);
+                            }
+
+                        }
                     }
                 }
             }
+            catch
+            {
+                return;
+            }
 
             kc.cls();
-            
-                
+                    
         }
 
         private static List<Card> LoadEquipment()
@@ -291,10 +295,6 @@ namespace PokemonTCGSimulator
             
 
             return eq;
-        }
-
-        public static void wl(string sentence){
-            Console.WriteLine(sentence);
         }
 
     }
