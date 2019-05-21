@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "PokemonTCGSimulator": {
+      "commandName": "Project",
+      "commandLineArgs": "dotnet run"
+    }
+  }
+}
